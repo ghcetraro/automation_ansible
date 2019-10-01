@@ -1,0 +1,117 @@
+Moving To Our Own Inventory File
+Creating our hosts file is as simple as... creating our hosts file.
+
+The file has no extension.
+
+If we were on a unix-y system, we could do:
+
+touch /our/ansible/directory/hosts
+And we get a nice empty file.
+
+The syntax inside our hosts file is also very easy to use.
+
+At the very top, we list out all our hosts. This may look something similar to:
+
+ansible-master ansible_ssh_host=192.168.0.17
+nginx-project1.dev ansible_ssh_host=192.168.0.20 ansible_ssh_user=deploy
+nodejs-project2.dev ansible_ssh_host=192.168.0.31 ansible_ssh_user=deploy
+nodejs-project2.dev ansible_ssh_host=192.168.0.32 ansible_ssh_user=deploy
+logstash.local ansible_ssh_host=192.168.0.99 ansible_ssh_user=deploy
+Notice, the first entry does not contain an ansible_ssh_user definition.
+
+This is because, in our instance, our ansible-master host is also the host on which we are running Ansible from, and as such,
+will take the currently logged in username when connecting via ssh - to itself.
+
+In the other entries we do specify and ansible_ssh_user, and this overrides the default user that would otherwise try to 
+connect - this is whichever user we are running Ansible as. 
+So remember, just because the user codereview_chris is valid on the machine we are running Ansible from, that the user 
+codereview_chris may very well not exist on the machine we are trying to run our playbook against.
+
+We will look into managing our users through Ansible Playbooks in a future video.
+
+Keeping Organised
+As our inventory files grow, keeping organised can become a chore.
+
+Whilst not particularly well documented in the Ansible-created hosts file (/etc/ansible/hosts), 
+there are a few ways to organise our inventories to protect our sanity.
+
+Perhaps the most useful is groups.
+
+We will see shortly how host_vars and group_vars are perfect for ensuring specific hosts, or groups of hosts, 
+get the right variables applied during Playbook execution.
+
+To make use of group_vars, first we need to put our hosts into Groups.
+
+Our Group names can be anything.
+
+Typically, my Group names correspond to a Role in some way. 
+As an example, I might have a Role for installing nginx, another for MySQL, one for PHP, and another for PHP XDebug.
+
+Let's imagine that you're working on a project. The project is for collecting stats from a fitness app. 
+As part of your local development environment, you would likely want to run one server so you're not having to spin up
+three or four virtual machines every time you want to do a little dev work. You'd also like a little debugging help.
+
+In production, it's a different story. One server for your MySQL database, another for Redis, two for nginx, and certainly no XDebug.
+
+Groups could help you here.
+
+[dev]
+fitness.dev
+
+[nginx]
+fitness.dev
+fitness.staging
+www1.fitness.tld
+www2.fitness.tld
+
+[php:children]
+nginx
+
+[php-xdebug]
+fitness.dev
+fitness.staging
+
+[mysql-database]
+fitness.dev
+db.fitness.tld
+All our groups are named with [bracket] syntax.
+
+Underneath, we can put in the any host name we used at the top of our hosts file.
+
+In one group defintion, we can ensure for example, that nginx will be installed in the same way on all of our web servers.
+
+We can also ensure all our nginx servers get PHP installed by using the special group_name:children syntax, and then rather
+than using an individual hosts name, we pass in an entire group name.
+This way we can begin nesting our groups inside groups inside groups. 
+This is not only a time saver, but a space saver as well. 
+Although it can get a little hard to follow, so don't go too deep.
+
+Running Playbooks Against Specific Groups
+Now that we have created our [nginx] group for example, how might we run the nginx role against this group?
+
+Well, of course, we would need a playbook and the role to begin with.
+
+Assuming we had them, running this would be simple:
+
+ansible-playbook -i hosts nginx.yml -k -K -s
+Inside the nginx.yml playbook, we would specify which hosts should recieve this playbook:
+
+# nginx.yml
+---
+- hosts: nginx
+And so, only members of the nginx group will have this playbook run against them.
+
+Running Playbooks Against Specific Hosts
+What if we wanted to run this playbook against only a specific host?
+
+Well, that's easy too:
+
+ansible-playbook -i hosts -l fitness.dev nginx.yml -k -K -s
+Now we would run the nginx playbook against only the fitness.dev server.
+
+We can combine all this together to make very specific adjustments to our set up. 
+And when we introduce group_vars and host_vars, we can start getting very granular with the exact set ups we want on any box, 
+at any time.
+
+Honestly, when your infrastructure gets Ansible-ised, you will start experiencing a wonderful freedom to experiment and adapt, 
+rebuilding and reprovisioning at will.
