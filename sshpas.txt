@@ -1,0 +1,94 @@
+sshpass: Login To SSH Server / Provide SSH Password Using A Shell Script
+
+How do I login over ssh without using password less RSA / DSA public keys? 
+How do I use ssh in a shell script? 
+How do I login non-interactivly performing password authentication with SSH and shell scripts?
+
+You can use the sshpass command to provide the password for ssh based login. 
+It is a non-interactive ssh password auth tool. From the man page:
+ 
+sshpass is a utility designed for running ssh using the mode referred to as “keyboard-interactive” password authentication, 
+but in non-interactive mode.
+
+ssh uses direct TTY access to make sure that the password is indeed issued by an interactive keyboard user. 
+Sshpass runs ssh in a dedicated tty, fooling it into thinking it is getting the password from an interactive user.
+
+The command to run is specified after sshpass’ own options. Typically it will be “ssh” with arguments, 
+but it can just as well be any other command. The password prompt used by ssh is, however, currently hardcoded into sshpass.
+
+Warning following examples may expose your computer securityWARNING! 
+These examples considered the least secure as simple ps command can expose password to all users on the same host. 
+I highly recommend using ssh’s public key authentication or keychain software to set up secure passwordless SSH access.
+Install sshpass under Debian / Ubuntu Linux
+Type the following command:
+$ sudo apt-get install sshpass
+
+Sample outputs:
+
+Fig.01: Installing sshpass on Debian/Ubuntu Linux
+Fig.01: Installing sshpass on Debian/Ubuntu Linux
+Install sshpass under RHEL/CentOS Linux
+First, enable EPEL repo and type the following yum command:
+$ sudo yum install sshpass
+
+If you are using Fedora Linux, type:
+$ sudo dnf install sshpass
+
+Install sshpass under Arch Linux
+$ sudo pacman -S sshpass
+
+Install sshpass under OpenSUSE Linux
+$ sudo zypper install sshpass
+
+Install sshpass under FreeBSD Unix
+To install the port, enter:
+# cd /usr/ports/security/sshpass/ && make install clean
+
+To add the package, run:
+# pkg install sshpass
+
+How do I use sshpass in Linux or Unix?
+Login to ssh server called server.example.com with password called t@uyM59bQ:
+$ sshpass -p 't@uyM59bQ' ssh username@server.example.com
+
+For shell script you may need to disable host key checking:
+$ sshpass -p 't@uyM59bQ' ssh -o StrictHostKeyChecking=no username@server.example.com
+
+Security unwise warning: The -p option should be considered the least secure of all of sshpass’s options. 
+I recommend that you use ssh’s public key authentication.
+
+A bash shell script example with SSHPASS
+The syntax is:
+
+SSHPASS='t@uyM59bQ' sshpass -e ssh vivek@server42.cyberciti.biz
+SSHPASS='t@uyM59bQ' sshpass -e ssh vivek@server42.cyberciti.biz date
+SSHPASS='t@uyM59bQ' sshpass -e ssh vivek@server42.cyberciti.biz w
+SSHPASS='t@uyM59bQ' sshpass -e ssh -o StrictHostKeyChecking=no vivek@server42.cyberciti.biz
+The password is passed as environment variable called SSHPASS.
+
+Reading password from file
+Another option is to read password from file using the -f option. The syntax is:
+sshpass -f fileNameHere ssh user@server
+
+Create a file as follows:
+
+$ echo 'myPassword' &gt; myfile
+$ chmod 0400 myfile
+$ sshpass -f myfile ssh vivek@server42.cyberciti.biz
+How do I backup /var/www/html using rsync?
+Run rsync over SSH using password authentication, passing the password on the command line:
+$ rsync --rsh="sshpass -p myPassword ssh -l username" server.example.com:/var/www/html/ /backup/
+
+OR
+$ SSHPASS='yourPasswordHere' rsync --rsh="sshpass -e ssh -l username" server.example.com:/var/www/html/ /backup/
+
+How do I use sshpass with gpg encrypted file?
+First, create a file as follows:
+$ echo 'mySshPasswordHere' > .sshpassword
+
+Now, encrypt a file using gpg command:
+$ gpg -c .sshpassword
+$ rm .sshpassword
+
+Finally, use it as follows:
+$ gpg -d -q .sshpassword.gpg > fifo; sshpass -f fifo ssh vivek@server1.cyberciti.biz
