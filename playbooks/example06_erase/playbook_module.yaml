@@ -1,0 +1,5 @@
+---
+- hosts: demo
+  user: eltano
+  tasks:
+    - file: path=/home/eltano/test/pepe.txt state=absent

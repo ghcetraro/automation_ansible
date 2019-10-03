@@ -1,0 +1,5 @@
+---
+- hosts: demo
+  user: ghcetraro
+  tasks:
+    - shell: /bin/rm -rf /home/ghcetraro/test/pepe.txt

@@ -1,0 +1,6 @@
+---
+- hosts: demo
+  user: eltano
+  tasks:
+    - name: copy file from machine1 to local
+      copy: src=/home/eltano/pepe.txt dest=/home/eltano/test
