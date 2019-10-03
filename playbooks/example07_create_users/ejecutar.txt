@@ -1,0 +1,9 @@
+ansible-playbook playbook.yaml -f 10
+
+////////////
+
+ansible 10.0.0.2 -u eltano -m user -a "name=sysadm group=1000 state=present"
+
+///////////////////
+
+ansible-playbook playbook.yaml --extra-vars pepe

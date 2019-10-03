@@ -1,0 +1,5 @@
+---
+- hosts: demo
+  sudo: yes 
+  tasks: - name: create admin user 
+  action: user name=sysadm group=1000 state=present

@@ -1,0 +1,28 @@
+---
+- hosts: demo
+  user: usuarioconacceso
+  sudo: yes
+  tasks:
+
+  - name: Creamos el grupo 'ansible' si no existe
+    group:
+      name: ansible
+      state: present
+
+  - name: Añadimos el grupo 'ansible' a sudoers sin necesidad de contraseña
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%ansible'
+      line: '%ansible ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+
+  - name: Añadir usuario 'ansrunner' al grupo 'ansible'
+    user: name=ansrunner groups=ansible append=yes state=present createhome=yes
+
+  - name: Añadir la clave rsa al usuario 'ansrunner'
+
+    authorized_key:
+      user: ansrunner
+      state: present
+      key: "{{ lookup('file', '/home/miusuario/.ssh/id_rsa.pub') }}"
