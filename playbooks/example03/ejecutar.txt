@@ -1,0 +1,3 @@
+Ejecutar, la contraseña SSH sólo debería pedirla una vez
+
+ansible-playbook -i hosts -u eltano -k main.yml

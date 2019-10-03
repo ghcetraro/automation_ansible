@@ -1,0 +1,7 @@
+---
+- hosts: all
+  tasks:
+    - authorized_key:
+        user: eltano
+        state: present
+        key: "{{ lookup('file', '/home/eltano/.ssh/id_rsa.pub') }}"

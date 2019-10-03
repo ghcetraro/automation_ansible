@@ -1,0 +1,11 @@
+Tarea
+
+-- Crear un ambiente de :
+--- 3 equipos web
+--- 1 equipo de base de datos
+--- 1 equipo de load balancer
+--- 1 equipo de nfs
+--- copiar ssh-key para administrar equipos
+--- instalar agente de monitoreo de zabbix por snmp en todos los equipos
+--- instalacion de cifs para dejar backups en un storage especial en todos los equipos
+

@@ -1,0 +1,67 @@
+---
+- hosts: showtermServers
+  remote_user: root
+  tasks:
+    - name: ensure packages are installed
+      yum: name={{item}} state=latest
+      with_items:
+        - postgresql
+        - postgresql-server
+        - postgresql-devel
+        - python-psycopg2
+        - git
+        - ruby21
+        - ruby21-passenger
+    - name: showterm server from github
+      git: repo=https://github.com/ConradIrwin/showterm.io dest=/root/showterm
+    - name: Initdb
+      command: service postgresql initdb
+               creates=/var/lib/pgsql/data/postgresql.conf
+ 
+    - name: Start PostgreSQL and enable at boot
+      service: name=postgresql
+               enabled=yes
+               state=started
+    - gem: name=pg state=latest user_install=no
+  handlers:
+   - name: restart postgresql
+     service: name=postgresql state=restarted
+ 
+- hosts: showtermServers
+  remote_user: root
+  sudo: yes
+  sudo_user: postgres
+  vars:
+    dbname: showterm
+    dbuser: showterm
+    dbpassword: showtermpassword
+  tasks:
+    - name: create db
+      postgresql_db: name={{dbname}}
+ 
+    - name: create user with ALL priv
+      postgresql_user: db={{dbname}} name={{dbuser}} password={{dbpassword}} priv=ALL
+- hosts: showtermServers
+  remote_user: root
+  tasks:
+    - name: database.yml
+      template: src=database.yml dest=/root/showterm/config/database.yml
+- hosts: showtermServers
+  remote_user: root
+  tasks:
+    - name: run bundle install
+      shell: bundle install
+      args:
+        chdir: /root/showterm
+- hosts: showtermServers
+  remote_user: root
+  tasks:
+    - name: run rake db tasks
+      shell: 'bundle exec rake db:create db:migrate db:seed'
+      args:
+        chdir: /root/showterm
+- hosts: showtermServers
+  remote_user: root
+  tasks:
+    - name: apache config
+      template: src=showterm.conf dest=/etc/httpd/conf.d/showterm.conf

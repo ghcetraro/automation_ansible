@@ -1,0 +1,102 @@
+---
+- hosts: dev_all
+  tasks:
+    - authorized_key:
+        user: eltano
+        state: present
+        key: "{{ lookup('file', '/home/eltano/.ssh/id_rsa.pub') }}"
+- hosts: dev_web
+  remote_user: root
+  tasks:
+    - name: ensure packages are installed
+      yum: name={{item}} state=latest
+      with_items:
+        - httpd
+        - php5.6
+        - php5.6-mysql
+        - snmp
+        - cifs-utils
+        - nfs-utils
+    - name: Start httpd and enable at boot
+      service: name=httpd
+               enabled=yes
+               state=started
+    - name: Start snmp and enable at boot
+      service: name=snmp
+               enabled=yes
+               state=started
+  handlers:
+    - name: restart httpd
+      service: name=httpd state=restarted
+    - name: restart snmp
+      service: name=snmp state=restarted
+ - hosts: dev_db
+  remote_user: root
+  tasks:
+    - name: ensure packages are installed
+      yum: name={{item}} state=latest
+      with_items:
+        - mysql-client
+        - mysql-server
+        - snmp
+        - cifs-utils
+        - nfs-utils
+    - name: Start mysql and enable at boot
+      service: name=mysqld
+               enabled=yes
+               state=started
+    - name: Start snmp and enable at boot
+      service: name=snmp
+               enabled=yes
+               state=started
+  handlers:
+    - name: restart mysql
+      service: name=mysql state=restarted
+    - name: restart snmp
+      service: name=snmp state=restarted
+ hosts: dev_nfs
+  remote_user: root
+  tasks:
+    - name: ensure packages are installed
+      yum: name={{item}} state=latest
+      with_items:
+        - nfs-server
+        - snmp
+        - cifs-utils
+        - nfs-utils
+    - name: Start nfs and enable at boot
+      service: name=nfs
+               enabled=yes
+               state=started
+    - name: Start snmp and enable at boot
+      service: name=snmp
+               enabled=yes
+               state=started
+  handlers:
+    - name: restart nfs
+      service: name=nfs state=restarted
+    - name: restart snmp
+      service: name=snmp state=restarted
+hosts: dev_ld
+  remote_user: root
+  tasks:
+    - name: ensure packages are installed
+      yum: name={{item}} state=latest
+      with_items:
+        - nginx
+        - snmp
+        - cifs-utils
+        - nfs-utils
+    - name: Start nginx and enable at boot
+      service: name=nginx
+               enabled=yes
+               state=started
+    - name: Start snmp and enable at boot
+      service: name=snmp
+               enabled=yes
+               state=started
+  handlers:
+    - name: restart nginx
+      service: name=nginx state=restarted
+    - name: restart snmp
+      service: name=snmp state=restarted

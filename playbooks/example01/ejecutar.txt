@@ -1,0 +1,1 @@
+ansible-playbook testPlaybook.yaml -f 10

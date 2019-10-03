@@ -1,0 +1,35 @@
+Manual https://ansible-tips-and-tricks.readthedocs.io
+
+
+-- comando default con clave ssh (toma el usuario por defecto que este usando)
+ansible prod -m ping
+
+/etc/ansible/hosts
+
+[prod]
+123.176.93.15
+
+--
+
+-- comando default con clave de usuario (toma el usuario por defecto que este usando) 
+IMPORTANTE: para usar esta opcion hay que logearse una vez en el server para guardar el fingerprint de ssh
+
+ansible prod -m ping - k -u ghcetraro
+
+/etc/ansible/hosts
+
+[prod]
+123.176.93.15
+
+-- ver el hostname de un equipo
+ansible prod -m shell -a "hostname" -u root -k
+
+-- instalar un paquete en la ultima version
+ansible all -m zypper -a "name=apache2 state=latest" -u root
+
+ansible prod -m yum -a "name=httpd state=present" -u root -k
+
+-- desinstalar un paquete en la ultima version
+
+ansible prod -m yum -a "name=httpd state=absent" -u root -k
+
