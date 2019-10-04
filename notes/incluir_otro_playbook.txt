@@ -1,0 +1,9 @@
+---
+- name: uso de include
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: copia de fichero.conf a /tmp
+	  copy: src=fichero.conf dest=/tmp
+	 
+    - include: otro_playbook.yml
