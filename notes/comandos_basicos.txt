@@ -41,3 +41,25 @@ ansible-playbook playbook.yml
 
 ansible-playbook release.yml --extra-vars "version=1.23.45 other_variable=foo"
 
+-- crear la estructura del roles
+
+ansible-galaxy init test-role-1
+
+-- roll structure
+
+tasks - contains the main list of tasks to be executed by the role.
+handlers - contains handlers, which may be used by this role or even anywhere outside this role.
+defaults - default variables for the role (see Using Variables for more information).
+vars - other variables for the role (see Using Variables for more information).
+files - contains files which can be deployed via this role.
+templates - contains templates which can be deployed via this role.
+meta - defines some meta data for this role. See below for more details.
+
+-- ejecutar role
+
+ansible-playbook -i  "192.168.0.10" --role  "path to role"
+
+-- ansible 2.7 you can do this:
+
+$ cd /path/to/ansible/
+$ ansible localhost -m include_role -a name=<role_name>
