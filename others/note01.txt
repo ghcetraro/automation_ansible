@@ -1,0 +1,37 @@
+Ansible es una plataforma de software libre para configurar y administrar computadoras. Basado en Python, permite conectar en paralelo a múltiples servidores (vía SSH), e implementar en ellos las configuraciones que hayamos definido.
+
+¿Qué podemos hacer con Ansible?
+En resumen, cualquier cosa que se puede hacer desde un shell script ejecutado por SSH. Hay que tener en cuenta que Ansible no funcionará bien si tenemos que esperar a que nos pregunten para enviar la información (por ejemplo con el comando passwd).
+
+¿Cómo funciona?
+Para funcionar, Ansible necesita 4 cosas:
+
+Una lista de servidores con los que vamos a trabajar
+Crear grupos con esos servidores (para facilitar el trabajo)
+Una serie de tareas que hacer (por ejemplo, instalar nginx + PHP)
+Definir una lista de tareas para una serie de grupos
+Por ejemplo, podemos usar Ansible para gestionar los servidores web1, web2 y correo1, crear el grupo web para los servidores web1 y web2, y el grupo correo para el servidor correo1, y después crear una lista de tareas tal que:
+
+En los servidores del grupo web, instala nginx + PHP 7
+En los servidores del grupo correo, instala exim con soporte DKIM
+Si mañana añadimos un nuevo servidor de correo, con añadirlo al grupo correo y ejecutar Ansible de nuevo, se instalará la misma configuración que en el servidor correo1. También podemos definir variables para instalar una versión de PHP distinta en el servidor web2
+
+Si este ejemplo os parece fácil, entender Ansible se reduce a entender sus nombres:
+
+servidores: inventory/hosts
+grupo de servidores: [] en inventory/hosts
+variables: inventory/host_vars e inventory/group_vars
+tareas: roles
+listas de tareas: playbooks
+¿ Dónde puedo encontrar roles de Ansible ?
+Ansible nos ofrece Ansible Galaxy, un repositorio de roles de Ansible donde cualquier puede aportar los roles que haya creado, donde podemos encontrar roles para practicamente cualquier tipo de tarea que queramos realizar.
+
+Si queremos instalar un role, solo tendremos que ejecutar el comando ansible-galaxy. Por ejemplo, para instalar un servidor ntp, podríamos ejecutar:
+
+ansible-galaxy install geerlingguy.ntp
+Una plántilla para empezar con Ansible
+Para poder empezar a trabajar con Ansible, he creado una plantilla de Ansible preconfigurada y documentada, con la que podréis empezar a trabajar en cuestión de minutos.
+
+La podéis encontrar en:
+
+https://github.com/macklus/ansible-template

@@ -33,3 +33,11 @@ ansible prod -m yum -a "name=httpd state=present" -u root -k
 
 ansible prod -m yum -a "name=httpd state=absent" -u root -k
 
+-- ejecutar un playbook
+
+ansible-playbook playbook.yml
+
+-- Pasar variables en la línea de comando
+
+ansible-playbook release.yml --extra-vars "version=1.23.45 other_variable=foo"
+

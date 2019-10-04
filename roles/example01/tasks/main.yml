@@ -1,0 +1,13 @@
+---
+# tasks file for vim-installer
+- name: Instalando Vim en Debian
+  apt:
+    name: vim
+    state: present
+  when: ansible_distribution == 'Debian'
+
+- name: Instalando Vim en CentOS
+  yum:
+    name: vim
+    state: present
+  when: ansible_distribution == 'CentOS'
