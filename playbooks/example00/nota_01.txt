@@ -1,0 +1,91 @@
+Los playbooks nos proporcionan una manera totalmente diferente de utilizar Ansible. Los comandos ad-hoc hacen de Ansible una herramienta muy potente, pero los playbooks la convierten en “la herramienta”. Mientras que podemos ejecutar comandos ad-hoc con Ansible, los playbooks podemos tenerlos en un control de versiones como Git. Además, pueden ejecutar tareas tal y como nosotros queramos haciendo uso de los inventarios, tags, roles, etc. Una de las cosas que más atrae a los DevOps a Ansible es que es muy sencillo convertir shell scripts en playbooks.
+
+ 
+
+Un playbook se compone de varios plays. El objetivo de un play es mapear un grupo de hosts con unos determinados roles, los cuales son representados por tareas (tasks). En su expresión más básica, una tarea no es más que la llamada a un determinado módulo de Ansible.
+
+Es posible orquestar muchas máquinas al mismo tiempo con los plays de Ansible gracias a la agrupación de los nodos en los inventarios de Ansible.
+
+Con estos comandos podríamos instalar un servidor Apache en cada nodo:
+
+$ sudo apt-get install apache2 
+$ sudo service apache2 start 
+Con este playbook de Ansible lo haríamos de forma paralela en ambos nodos:
+
+---  
+hosts: all 
+remote_user: root 
+tasks: 
+- name: Ensure Apache is at the latest version 
+apt: name=apache2 state=latest 
+- name: ensure apache is running 
+service: name=apache2 state=started enabled=yes 
+ 
+Podemos ejecutar el playbook anterior con:
+
+$ ansible-playbook playbook.yaml 
+Tal y como hemos mencionado antes, los playbooks pueden contener múltiples plays:
+
+- hosts: all 
+remote_user: root 
+tasks: 
+- name: Ensure Apache is at the latest version 
+apt: name=apache2 state=latest 
+- hosts: databases 
+tasks: 
+- name: Ensure MariaDB is at the latest version 
+apt: name=mariadb state=latest 
+ 
+Cada play contiene una lista de tareas, las cuales se ejecutan en orden y solo una al mismo tiempo. Es importante saber que el orden de las tareas es el mismo para todos los nodos.
+
+Si falla una tarea, se puede volver a ejecutar, ya que los módulos deben ser idempotentes, es decir, que ejecutar un módulo varias veces debe tener el mismo resultado que si se ejecuta una vez.
+
+Todas las tareas deben tener un name, el cual se incluye en la salida del comando al ejecutar el playbook. Su objetivo es que la persona que ejecute Ansible pueda leer con facilidad la ejecución del playbook.
+
+Las tareas se declaran en el formato module: options. En un ejemplo anterior nos segurábamos de que el servicio apache2 se estuviese ejecutando:
+
+--- hosts: all 
+remote_user: root 
+tasks: 
+- name: ensure apache is running 
+service: name=apache2 state=started enabled=yes 
+
+Los módulos command y shell son los únicos comandos que no utilizan el formato clave=valor, sino que directamente se le pasa como parámetro el comando que deseamos ejecutar:
+
+--- hosts: all 
+remote_user: root 
+tasks: 
+- name: Run a command 
+shell: /usr/bin/command 
+Tal y como se ha mencionado anteriormente, los módulos deben ser idempotentes y pueden realizar cambios en los servidores donde se ejecuten. Ansible reconoce dichos cambios y tiene un sistema de eventos que se puede utilizar para gestionar el resultado de una acción.
+
+Estas acciones de notificación son lanzadas al final de cada bloque de tareas en un play y solo se ejecutarán una vez incluso si se llaman desde diferentes tareas. Por ejemplo, cuando cambiemos un archivo de configuración podríamos reiniciar Apache, pero si Ansible detecta que lo vamos a reiniciar más de una vez, lo reinicia una única vez.
+
+
+- name: configuration file 
+template: src=template.j2 dest=/etc/file.conf 
+notify: 
+- restart php 
+- restart apache 
+
+ 
+handlers: 
+- name: restart php 
+service: name=php state=restarted 
+- name: restart apache 
+service: name=apache state=restarted 
+  
+Desde Ansible 2.2, los handlers pueden “escuchar” diferentes topics para evitar hacer llamadas a distintos handlers:
+
+
+tasks: 
+- name: restart everything 
+command: echo "restart the web services" 
+notify: "restart web services" 
+handlers: 
+- name: restart php 
+service: name=php state=restarted 
+listen: "restart web services" 
+- name: restart apache 
+service: name=apache state=restarted 
+listen: "restart web services" 
