@@ -1,6 +1,6 @@
 ---
-- hosts: demo
-  user: eltano
+- hosts: appServers
+  become: sudo
   tasks:
     - name: copy file from machine1 to local
-      copy: src=/home/eltano/pepe.txt dest=/home/eltano/test
+      copy: src=/tmp/pepe.txt dest=/home/eltano/test
